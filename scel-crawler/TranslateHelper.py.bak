@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+
+import json
+import requests
+import time
+from hashlib import md5
+from threading import Thread
+
+translate_path = 'http://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule'
+app_version = r'5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+special_cookie = 'OUTFOX_SEARCH_USER_ID'  # Special cookie must be set
+headers = {
+    'User-Agent': 'Mozilla/' + app_version,
+    'Origin': r'http://fanyi.youdao.com',
+    'Referer': r'http://fanyi.youdao.com/?keyfrom=dict2.top'
+}
+client = 'fanyideskweb'
+salt = 'p09@Bn{h02_BIEe]$P^nG'  # Parse from fanyi.min.js
+
+class TranslateHelper(Thread):
+    trans_words = []
+    def __init__(self, word):
+        super().__init__()
+        self.word = word
+
+    def run(self):
+        if 'Cookie' not in headers:
+            cookie_get = requests.get(translate_path, headers=headers)
+            headers['Cookie'] = special_cookie + '=' + cookie_get.cookies[special_cookie]
+
+        now = time.time()
+        data = {
+            'i': self.word,
+            'from': 'AUTO',
+            'to': 'AUTO',
+            'smartresult': 'dict',
+            'client': client,
+            'salt': str(int(now * 10000)),
+            'sign': md5((client + self.word + str(int(now * 10000)) + salt).encode('utf-8')).hexdigest(),
+            'ts': str(int(now * 1000)),
+            'bv': md5(app_version.encode('utf-8')).hexdigest(),
+            'doctype': 'json',
+            'version': '2.1',
+            'keyfrom': 'fanyi.web',
+            'action': 'FY_BY_REALTIME',
+            'typoResult': 'false'
+        }
+
+        translate_post = requests.post(translate_path, headers=headers, data=data)
+        translate_json = translate_post.json()
+#        if translate_json['errorCode'] != 0:
+#            translate_post = requests.post(translate_path, headers=headers, data=data)
+#            translate_json = translate_post.json()
+
+        try:
+            self.translate_word = translate_json['translateResult'][0][0]['tgt']
+        except Exception as e:
+            print(e)
+        else:
+            self.trans_words.append((self.word, '_'.join(self.translate_word.lower().split())))
+
+    def get_trans_word(self):
+        return self.translate_word
+
