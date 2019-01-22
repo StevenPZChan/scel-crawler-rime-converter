@@ -18,5 +18,5 @@ class DownloadHelper(Thread):
         file_name = os.path.join('download', self.name)
         with open(file_name, 'wb') as f:
             f.write(scel_bin)
-            print('Downloaded file:', self.name)
+        print('Downloaded file:', self.name)
 

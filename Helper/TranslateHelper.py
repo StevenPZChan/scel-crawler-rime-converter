@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import requests
 from enum import Enum
 from threading import Thread
@@ -38,15 +39,16 @@ class TranslateHelper(Thread):
             translate_json = json.loads(requests.get(trans_url).text)
             self.translate_word = self._get_result(translate_json, result_path[self.trans_api])
         except Exception as e:
-            print(e)
+            # print(e)
             if self.trans_api.value < TransApi.NUM_OF_API.value:
                 self.trans_api = TransApi(self.trans_api.value + 1)
                 self.run()
             else:
                 print('No usable translate API, please wait for some time.')
         else:
-            trans_res = self.translate_word.encode('ascii', errors='ignore').decode('ascii').lower()
-            self.trans_words.append((self.word, '_'.join(trans_res.split())))
+            trans_res = self.translate_word.encode('ascii', errors='ignore').decode('ascii') or self.word_omit
+            trans_res = re.sub(r'[?*/\<>:"|]', '', trans_res.lower())
+            TranslateHelper.trans_words.append((self.word, '_'.join(trans_res.split())))
 
     def get_trans_word(self):
         return self.translate_word
