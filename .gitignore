@@ -106,3 +106,4 @@ venv.bak/
 # This project
 config/
 download/
+parse/

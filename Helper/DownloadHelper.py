@@ -1,11 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import requests
 from threading import Thread
 
-if not os.path.exists('download'):
-    os.makedirs('download')
+os.path.exists('download') or os.makedirs('download')
 
 class DownloadHelper(Thread):
     def __init__(self, url, name):
@@ -18,5 +18,5 @@ class DownloadHelper(Thread):
         file_name = 'download/' + self.name + '.scel'
         with open(file_name, 'wb') as f:
             f.write(scel_bin)
-            print('Downloaded file:', self.name) 
+            print('Downloaded file:', self.name)
 

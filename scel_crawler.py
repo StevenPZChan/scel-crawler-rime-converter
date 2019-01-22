@@ -1,14 +1,17 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-import os
+"""
+This python script is for scel crawler from sogou.com.
+:Author: StevenPZChan
+"""
 import re
 import requests
 import sys
 from getopt import getopt
 from lxml import etree
 
-from DownloadHelper import DownloadHelper
-from TranslateHelper import TranslateHelper
+from Helper import *
 
 def usage():
     print('Usage: ./scel_crawler.py [options]')
@@ -33,13 +36,12 @@ if __name__ == '__main__':
                 translate_omit = value
     except Exception as e:
         print('No specified keyword! Using keyword: 【官方推荐】')
-        
+
     key_word = key_word or '【官方推荐】'
     search_results = 'http://wubi.sogou.com/dict/search.php?word=' + \
         requests.utils.quote(key_word, encoding='gbk') + \
         '&searchOption=dict&type=0&personal=1&page='
     scel_download_path = ['http://download.pinyin.sogou.com/dict/download_cell.php?id=', '&name=']
-    # translate_path = 'http://dict.youdao.com/w/'
     id_xpath = ['//*[@id="searchres"]/div[', ']/h2/a']
     translate_threads = []
 
@@ -53,12 +55,12 @@ if __name__ == '__main__':
             result = html.xpath(id_xpath[0] + str(j + 1) + id_xpath[1])
             if not result:
                 continue
-                
+
             scel_url = result[0].get('href')
             num = re.findall(r'id=(\d+)', scel_url)
             if not num:
                 continue
-                
+
             has_result = True
             scel_num = num[0]
             scel_name = result[0].text
@@ -76,10 +78,6 @@ if __name__ == '__main__':
     for thread in translate_threads:
         thread.join()
 
-    if not os.path.exists('config'):
-        os.makedirs('config')
-    with open('config/trans.conf', 'w') as f:
-        for w, t in TranslateHelper.trans_words:
-            f.write(w + '\t' + t + '\n')
+    ConfigHelper(TranslateHelper.trans_words).write_config()
     sys.exit(0)
 
