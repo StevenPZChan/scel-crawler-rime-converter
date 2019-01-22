@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import re
 import struct
 from threading import Thread
+
+os.path.exists('parse') or os.makedirs('parse')
 
 class ScelParser(Thread):
     _start_pinyin = 0x1540  # pinyin offset
@@ -12,7 +16,7 @@ class ScelParser(Thread):
     def __init__(self, scel_name, file_name):
         super().__init__()
         self.scel_name = scel_name
-        self.file_name = file_name
+        self.file_name = re.sub(r'[?*/\<>:"|]', '', file_name) + '.txt'
         self.pinyin_table = {}
         self.result = []
 
@@ -94,8 +98,9 @@ class ScelParser(Thread):
                 pos += ext_len
 
     def _write(self):
-        with open(self.file_name, 'w') as f:
+        file_name = os.path.join('parse', self.file_name)
+        with open(file_name, 'w') as f:
             for word, py, count in self.result:
                 f.write(str(word) + '\t' + py + '\t' + str(count) + '\n')
-            print('Parse completed:', self.file_name)
+            print('Parsed file:', self.file_name)
 

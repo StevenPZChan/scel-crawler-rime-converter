@@ -14,14 +14,14 @@ class TransApi(Enum):
     NUM_OF_API = 3
 
 translate_path = {
-    TransApi.YOUDAO: 'http://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=',
+    TransApi.YOUDAO: 'http://fanyi.youdao.com/translate?&doctype=json&type=ZH_CN2EN&i=',
     TransApi.BAIDU: 'http://fanyi.baidu.com/transapi?from=auto&to=en&query=',
-    TransApi.GOOGLE: 'http://translate.google.cn/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl=en&q='
+    TransApi.GOOGLE: 'http://translate.google.cn/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl=en&q=',
 }
 result_path = {
     TransApi.YOUDAO: ('translateResult', 0, 0, 'tgt'),
     TransApi.BAIDU: ('data', 0, 'dst'),
-    TransApi.GOOGLE: ('sentences', 0, 'trans')
+    TransApi.GOOGLE: ('sentences', 0, 'trans'),
 }
 
 class TranslateHelper(Thread):
@@ -45,7 +45,8 @@ class TranslateHelper(Thread):
             else:
                 print('No usable translate API, please wait for some time.')
         else:
-            self.trans_words.append((self.word, '_'.join(self.translate_word.lower().split())))
+            trans_res = self.translate_word.encode('ascii', errors='ignore').decode('ascii').lower()
+            self.trans_words.append((self.word, '_'.join(trans_res.split())))
 
     def get_trans_word(self):
         return self.translate_word

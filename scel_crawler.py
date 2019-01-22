@@ -35,14 +35,19 @@ if __name__ == '__main__':
             if option == '--translate_omit':
                 translate_omit = value
     except Exception as e:
-        print('No specified keyword! Using keyword: 【官方推荐】')
+        print('Wrong usage!')
+        usage()
 
-    key_word = key_word or '【官方推荐】'
+    if not key_word:
+        print('No specified keyword! Using keyword: 【官方推荐】')
+        key_word = '【官方推荐】'
+        translate_omit = '【官方推荐】'
     search_results = 'http://wubi.sogou.com/dict/search.php?word=' + \
         requests.utils.quote(key_word, encoding='gbk') + \
         '&searchOption=dict&type=0&personal=1&page='
     scel_download_path = ['http://download.pinyin.sogou.com/dict/download_cell.php?id=', '&name=']
     id_xpath = ['//*[@id="searchres"]/div[', ']/h2/a']
+    download_threads = []
     translate_threads = []
 
     i = 1  # Start from page 1
@@ -66,7 +71,9 @@ if __name__ == '__main__':
             scel_name = result[0].text
             scel_download = scel_download_path[0] + scel_num + scel_download_path[1] + scel_name
             scel_name = scel_name.replace('/', '_')
-            DownloadHelper(scel_download, scel_name).start()
+            download_thread = DownloadHelper(scel_download, scel_name)
+            download_threads.append(download_thread)
+            download_thread.start()
             translate_thread = TranslateHelper(scel_name, translate_omit)
             translate_threads.append(translate_thread)
             translate_thread.start()
@@ -77,7 +84,10 @@ if __name__ == '__main__':
 
     for thread in translate_threads:
         thread.join()
-
     ConfigHelper(TranslateHelper.trans_words).write_config()
+
+    for thread in download_threads:
+        thread.join()
+    print('Crawl completed!')
     sys.exit(0)
 
