@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import requests
 from enum import Enum
 from threading import Thread
@@ -46,7 +47,8 @@ class TranslateHelper(Thread):
                 print('No usable translate API, please wait for some time.')
         else:
             trans_res = self.translate_word.encode('ascii', errors='ignore').decode('ascii').lower()
-            self.trans_words.append((self.word, '_'.join(trans_res.split())))
+            trans_res = re.sub(r'[?*/\<>:"|]', '', trans_res)
+            TranslateHelper.trans_words.append((self.word, '_'.join(trans_res.split())))
 
     def get_trans_word(self):
         return self.translate_word

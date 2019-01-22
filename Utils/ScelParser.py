@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 import struct
 from threading import Thread
 
@@ -16,7 +15,7 @@ class ScelParser(Thread):
     def __init__(self, scel_name, file_name):
         super().__init__()
         self.scel_name = scel_name
-        self.file_name = re.sub(r'[?*/\<>:"|]', '', file_name) + '.txt'
+        self.file_name = file_name + '.txt'
         self.pinyin_table = {}
         self.result = []
 
@@ -102,5 +101,5 @@ class ScelParser(Thread):
         with open(file_name, 'w') as f:
             for word, py, count in self.result:
                 f.write(str(word) + '\t' + py + '\t' + str(count) + '\n')
-            print('Parsed file:', self.file_name)
+        print('Parsed file:', self.file_name)
 
