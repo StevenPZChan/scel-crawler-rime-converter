@@ -1,0 +1,11 @@
+#!/bin/bash
+# Settings
+KEYWORD=【官方推荐】
+TRANS_OMIT=【官方推荐】
+OUT_DIR=rime
+TARGET=wubi
+DICT_PREFIX=wubi_pinyin
+DICT_MASTER_NAME=extended
+COPY=$HOME/.config/fcitx/rime
+HOOK_AFTER='rime_deployer --build $COPY /usr/share/rime-data'
+
